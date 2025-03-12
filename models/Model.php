@@ -2,49 +2,49 @@
 require "Database.php";
 
 /**
- * Abstract class Model provides a basic implementation of a data model.
- * It contains a static method init() which is used to initialize the database connection.
- * The method checks if the database connection has already been established (i.e. if the static property $db is not null).
- * If the connection has not been established, it creates a new instance of the Database class and assigns it to the static property $db.
- * This way, the database connection is only established once, even if multiple models are used in the same request.
+ * Abstraktā klase Model nodrošina pamatfunkcionalitāti datu modelim.
+ * Tā satur statisku metodi init(), kas tiek izmantota datu bāzes savienojuma inicializēšanai.
+ * Metode pārbauda, vai savienojums jau ir izveidots (t.i., vai statiskā īpašība $db nav null).
+ * Ja savienojums vēl nav izveidots, tiek izveidots jauns Database klases instances objekts un piešķirts statiskajai īpašībai $db.
+ * Tādējādi datu bāzes savienojums tiek izveidots tikai vienu reizi, pat ja tajā pašā pieprasījumā tiek izmantoti vairāki modeļi.
  * 
- * The class also contains an abstract method getTableName() which must be implemented by any class that extends Model.
- * This method should return the name of the database table that the model represents.
+ * Klase satur arī abstraktu metodi getTableName(), kuru jāīsteno jebkurai klasei, kas paplašina Model klasi.
+ * Šai metodei ir jāatgriež datu bāzes tabulas nosaukums, kuru šis modelis pārstāv.
  * 
- * The class also contains a static method all() which returns all records from the table.
+ * Klase satur arī statisku metodi all(), kas atgriež visus ierakstus no tabulas.
  */
 abstract class Model {
     protected static $db;
 
     /**
-     * Initializes the database connection.
+     * Inicializē datu bāzes savienojumu.
      */
     public static function init() {
-        // If the database connection has not been established, create a new instance of the Database class
+        // Ja datu bāzes savienojums vēl nav izveidots, izveido jaunu Database klases instanci
         if (!self::$db) {
             self::$db = new Database();
         }
     }
 
     /**
-     * Returns the name of the database table that the model represents.
-     * This method must be implemented by any class that extends Model.
+     * Atgriež datu bāzes tabulas nosaukumu, kuru pārstāv modelis.
+     * Šī metode ir obligāti jāīsteno jebkurai klasei, kas paplašina Model klasi.
      */
     abstract protected static function getTableName(): string;
 
     /**
-     * Returns all records from the table.
+     * Atgriež visus ierakstus no tabulas.
      */
     public static function all() {
         self::init();
         $sql = "SELECT * FROM " . static::getTableName();
-        // Execute the query and return the results
+        // Izpilda vaicājumu un atgriež rezultātus
         $records = self::$db->query($sql)->fetchAll();
         return  $records;
     }
 
     /**
-     * Find a record by ID.
+     * Atrod ierakstu pēc ID.
      */
     public static function find($id) {
         self::init();
@@ -54,21 +54,21 @@ abstract class Model {
     }
 
     /**
-     * Create a new record.
+     * Izveido jaunu ierakstu.
      */
     public static function create($data) {
         self::init();
 
-        $columns = implode(", ", array_keys($data)); // Convert keys to column names
-        $placeholders = implode(", ", array_fill(0, count($data), "?")); // Create ?, ?, ?
-        $values = array_values($data); // Extract values
+        $columns = implode(", ", array_keys($data)); // Pārvērš atslēgas par kolonnu nosaukumiem
+        $placeholders = implode(", ", array_fill(0, count($data), "?")); // Izveido ?, ?, ?
+        $values = array_values($data); // Izvelk vērtības
 
         $sql = "INSERT INTO " . static::getTableName() . " ($columns) VALUES ($placeholders)";
         return self::$db->query($sql, $values);
     }
 
     /**
-     * Update an existing record.
+     * Atjaunina esošu ierakstu.
      */
     public static function save($id, $data) {
         self::init();
@@ -86,7 +86,7 @@ abstract class Model {
     }
 
     /**
-     * Delete a record.
+     * Dzēš ierakstu.
      */
     public static function delete($id) {
         self::init();
